@@ -85,8 +85,8 @@ def processGenres():
         for movie in movies:
             compoundScore = movie["CompoundScore"]
             revenue = movie["Revenue"]
-            boxOfficeRevenue.append(int(revenue))
-            sentimentScore.append(int(compoundScore))
+            boxOfficeRevenue.append(revenue)
+            sentimentScore.append(compoundScore)
         print(
             "Finished processing {numMovies} {genre} movies".format(
                 numMovies=numMovies, genre=genre
