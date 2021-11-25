@@ -11,14 +11,14 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 sia = SentimentIntensityAnalyzer()
 englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA"]
 genresToConsider = {
-    # "Horror": [],
-    # "Romance": [],
-    # "Comedy": [],
-    # "Action": [],
-    # "Adventure": [],
-    # "Animation": [],
-    # "Crime": [],
-    "Drama": []
+    "Horror": [],
+    "Romance": [],
+    "Comedy": [],
+    "Action": [],
+    "Adventure": [],
+    "Animation": [],
+    "Crime": [],
+    "Drama": [],
 }
 
 
