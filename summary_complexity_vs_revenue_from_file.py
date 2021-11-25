@@ -26,17 +26,17 @@ def presentResults(summaryComplexity, revenue):
     title = "The Effect of Movie Summary Complexity on Movie Revenue"
     fig.suptitle(title, wrap=True)
     # plt.xlabel("Summary Complexity (Gunning Fox Index)")
-    plt.xlabel("Summary Complexity (Smog Index)")
+    plt.xlabel("Summary Complexity (Flesch-Kincaid Index)")
     plt.ylabel("Box Office Revenue")
     # plt.savefig("summary_gunning_fog_complexity_vs_revenue.png")
-    plt.savefig("summary_smog_complexity_vs_revenue.png")
+    plt.savefig("summary_flesch_kincaid_complexity_vs_revenue.png")
     plt.show()
 
 
 def processSummaryComplexityRevenueRelationshipAllGenres():
     numMovies = 0
     # data = pd.read_csv("summary_gunning_fog_complexity_vs_revenue.csv", ",")
-    data = pd.read_csv("summary_smog_complexity_vs_revenue.csv", ",")
+    data = pd.read_csv("summary_flesch_kincaid_complexity_vs_revenue.csv", ",")
 
     print("Finished processing {numMovies} movies".format(numMovies=numMovies))
     print(data.columns)

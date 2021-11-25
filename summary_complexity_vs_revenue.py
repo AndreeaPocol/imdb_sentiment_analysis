@@ -19,7 +19,7 @@ def presentResults(summaryComplexity, revenue):
     points = zip(summaryComplexity, revenue)
     header = ["ComplexityScore", "BoxOfficeRevenue"]
     # with open("summary_gunning_fog_complexity_vs_revenue.csv", "w+") as csvfile:
-    with open("summary_smog_complexity_vs_revenue.csv", "w+") as csvfile:
+    with open("summary_flesch_kincaid_complexity_vs_revenue.csv", "w+") as csvfile:
         filewriter = csv.writer(csvfile, delimiter=",")
         filewriter.writerow(header)
         filewriter.writerows(points)
