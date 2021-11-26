@@ -3,7 +3,7 @@ import statistics
 import matplotlib.pyplot as plt
 from re import sub
 
-englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA"]
+englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 
 genresToConsider = {
     "Horror": [],

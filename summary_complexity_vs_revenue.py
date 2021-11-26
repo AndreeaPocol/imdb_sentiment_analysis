@@ -4,7 +4,7 @@ import csv
 import matplotlib.pyplot as plt
 from readability import Readability
 
-englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA"]
+englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 
 
 def releasedInEnglishSpeakingCountry(countries):

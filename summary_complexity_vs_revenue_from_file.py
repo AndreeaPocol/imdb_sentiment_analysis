@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import scipy.stats as sts
 
-englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA"]
+englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 
 
 def releasedInEnglishSpeakingCountry(countries):
