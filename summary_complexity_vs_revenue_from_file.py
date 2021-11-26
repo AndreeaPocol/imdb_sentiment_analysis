@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import scipy.stats as sts
+import numpy as np
 
+fleschKincaid = True
+gunningFog = False
+cobf = True
 englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 
 
@@ -25,21 +28,22 @@ def presentResults(summaryComplexity, revenue):
     plt.plot(summaryComplexity, revenue, ".", color="black")
     title = "The Effect of Movie Summary Complexity on Movie Revenue"
     fig.suptitle(title, wrap=True)
-    # plt.xlabel("Summary Complexity (Gunning Fox Index)")
-    plt.xlabel("Summary Complexity (Flesch-Kincaid Index)")
     plt.ylabel("Box Office Revenue")
-    # plt.savefig("summary_gunning_fog_complexity_vs_revenue.png")
-    plt.savefig("summary_flesch_kincaid_complexity_vs_revenue.png")
+    if fleschKincaid:
+        plt.xlabel("Summary Complexity (Flesch-Kincaid Index)")
+        plt.savefig("summary_flesch_kincaid_complexity_vs_revenue.png")
+    elif gunningFog:
+        plt.xlabel("Summary Complexity (Gunning Fox Index)")
+        plt.savefig("summary_gunning_fog_complexity_vs_revenue.png")
     plt.show()
 
 
 def processSummaryComplexityRevenueRelationshipAllGenres():
-    numMovies = 0
-    # data = pd.read_csv("summary_gunning_fog_complexity_vs_revenue.csv", ",")
-    data = pd.read_csv("summary_flesch_kincaid_complexity_vs_revenue.csv", ",")
+    if fleschKincaid:
+        data = pd.read_csv("summary_flesch_kincaid_complexity_vs_revenue.csv", ",")
+    elif gunningFog:
+        data = pd.read_csv("summary_gunning_fog_complexity_vs_revenue.csv", ",")
 
-    print("Finished processing {numMovies} movies".format(numMovies=numMovies))
-    print(data.columns)
     presentResults(data.ComplexityScore, data.BoxOfficeRevenue)
 
 

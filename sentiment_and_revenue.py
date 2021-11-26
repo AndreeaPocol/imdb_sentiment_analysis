@@ -8,6 +8,15 @@ from re import sub
 import matplotlib.pyplot as plt
 from nltk.sentiment import SentimentIntensityAnalyzer
 
+filter = False  # filter based on runtime and revenue
+write = False  # write resuls to CSV file
+save = False  # save results as PNG
+# curve / line of best fit
+lobf = False  # polyfit, degree 1
+cobf1 = False  # curve_fit
+cobf2 = False  # https://stackoverflow.com/a/51975675
+cobf3 = True  # polyfit, degree 3
+
 sia = SentimentIntensityAnalyzer()
 englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 genresToConsider = {
@@ -63,42 +72,55 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
     )
     xLabel = "Summary Sentiment Score"
     yLabel = "Box Office Revenue"
-    filename = "sentiment_score_vs_box_office_revenue_{genre}_genre_sentiments".format(
-        genre=genre.lower()
-    )
+    if filter:
+        filename = "sentiment_score_vs_box_office_revenue_{genre}_genre_sentiments_filtered".format(
+            genre=genre.lower()
+        )
+    else:
+        filename = (
+            "sentiment_score_vs_box_office_revenue_{genre}_genre_sentiments".format(
+                genre=genre.lower()
+            )
+        )
 
     # graph results
     fig = plt.figure()
     plt.plot(sentimentScore, boxOfficeRevenue, ".", color="black")
 
-    # # Plot line of best fit
-    # plt.plot(
-    #     np.unique(sentimentScore),
-    #     np.poly1d(np.polyfit(sentimentScore, boxOfficeRevenue, 1))(
-    #         np.unique(sentimentScore)
-    #     ),
-    # )
-
-    # # Plot curve of best fit (1)
-    # try:
-    #     popt, pcov = curve_fit(func, sentimentScore, boxOfficeRevenue)
-    #     plt.plot(
-    #         sentimentScore,
-    #         func(sentimentScore, *popt),
-    #         "r-",
-    #         label="fit: a=%5.3f, b=%5.3f, c=%5.3f" % tuple(popt),
-    #     )
-    # except:
-    #     print("Couldn't fit {genre} data".format(genre=genre))
-    #     pass
-
-    # # Plot curve of best fit (2)
-    # cobf.plotCurveOfBestFit(
-    #     sentimentScore, boxOfficeRevenue, plotTitle, xLabel, yLabel, filename
-    # )
-
-    # # Log plot
-    # plt.yscale("log")
+    if lobf:
+        # Plot line of best fit
+        plt.plot(
+            np.unique(sentimentScore),
+            np.poly1d(np.polyfit(sentimentScore, boxOfficeRevenue, 1))(
+                np.unique(sentimentScore)
+            ),
+        )
+    elif cobf1:
+        # Plot curve of best fit (1)
+        try:
+            popt, pcov = curve_fit(func, sentimentScore, boxOfficeRevenue)
+            plt.plot(
+                sentimentScore,
+                func(sentimentScore, *popt),
+                "r-",
+                label="fit: a=%5.3f, b=%5.3f, c=%5.3f" % tuple(popt),
+            )
+        except:
+            print("Couldn't fit {genre} data".format(genre=genre))
+            pass
+    elif cobf2:
+        # Plot curve of best fit (2)
+        cobf.plotCurveOfBestFit(
+            sentimentScore, boxOfficeRevenue, plotTitle, xLabel, yLabel, filename
+        )
+    elif cobf3:
+        # Plot curve of best fit
+        plt.plot(
+            np.unique(sentimentScore),
+            np.poly1d(np.polyfit(sentimentScore, boxOfficeRevenue, 3))(
+                np.unique(sentimentScore)
+            ),
+        )
 
     if genre == "All":
         title = "The Effect of Movie Summary Sentiment Score on Box Office Revenue"
@@ -108,16 +130,18 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
     fig.suptitle(title, wrap=True)
     plt.xlabel(xLabel)
     plt.ylabel(yLabel)
-    plt.savefig(filename + ".png")
+    if save:
+        plt.savefig(filename + ".png")
     plt.show()
 
     # write results
-    points = zip(sentimentScore, boxOfficeRevenue)
-    header = ["Sentiment Score", "Box Office Revenue"]
-    with open(filename + ".csv", "w+") as csvfile:
-        filewriter = csv.writer(csvfile, delimiter=",")
-        filewriter.writerow(header)
-        filewriter.writerows(points)
+    if write:
+        points = zip(sentimentScore, boxOfficeRevenue)
+        header = ["Sentiment Score", "Box Office Revenue"]
+        with open(filename + ".csv", "w+") as csvfile:
+            filewriter = csv.writer(csvfile, delimiter=",")
+            filewriter.writerow(header)
+            filewriter.writerows(points)
 
 
 def processGenres():
@@ -153,29 +177,33 @@ def processSentimentRevenueRelationshipAllGenres():
                 or "Title" not in movie
                 or "Type" not in movie
                 or "Country" not in movie
-                # or "Runtime" not in movie
             ):
                 continue
+            if filter:
+                if "Runtime" not in movie:
+                    continue
             countries = movie["Country"].split(",")
             plot = movie["Plot"]
             boxOffice = movie["BoxOffice"]
-            runTime = movie["Runtime"]
+            if filter:
+                runTime = movie["Runtime"]
             type = movie["Type"]
-            if (
-                # runTime == "N/A" or
-                boxOffice == "N/A"
-                or plot == "N/A"
-            ):
+            if boxOffice == "N/A" or plot == "N/A":
                 continue
+            if filter:
+                if runTime == "N/A":
+                    continue
             if type != "movie":
                 continue
-            # if int(runTime.split(" ")[0]) < 75.0:
-            #     continue
+            if filter:
+                if int(runTime.split(" ")[0]) < 75.0:
+                    continue
             if not releasedInEnglishSpeakingCountry(countries):
                 continue
             revenue = float(sub(r"[^\d.]", "", boxOffice))
-            # if revenue < 1000000:
-            #     continue
+            if filter:
+                if revenue < 1000000:
+                    continue
             numMovies += 1
             movieGenres = movie["Genre"].split(",")
             compoundScore = sia.polarity_scores(plot)["compound"]

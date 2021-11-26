@@ -1,8 +1,12 @@
 import json
+import re
 from re import sub
 import csv
 import matplotlib.pyplot as plt
 from readability import Readability
+
+fleschKincaid = False
+gunningFog = True
 
 englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 
@@ -18,8 +22,11 @@ def presentResults(summaryComplexity, revenue):
     # write results
     points = zip(summaryComplexity, revenue)
     header = ["ComplexityScore", "BoxOfficeRevenue"]
-    # with open("summary_gunning_fog_complexity_vs_revenue.csv", "w+") as csvfile:
-    with open("summary_flesch_kincaid_complexity_vs_revenue.csv", "w+") as csvfile:
+    if gunningFog:
+        file = "summary_gunning_fog_complexity_vs_revenue.csv"
+    elif fleschKincaid:
+        file = "summary_flesch_kincaid_complexity_vs_revenue.csv"
+    with open(file, "w+") as csvfile:
         filewriter = csv.writer(csvfile, delimiter=",")
         filewriter.writerow(header)
         filewriter.writerows(points)
@@ -47,16 +54,23 @@ def processSummaryComplexityRevenueRelationshipAllGenres():
             if movie["BoxOffice"] == "N/A" or movie["Plot"] == "N/A":
                 continue
             boxOffice = float(sub(r"[^\d.]", "", movie["BoxOffice"]))
-
-            plot = movie["Plot"] * 100
+            pattern = re.compile(r"\.{1,}")
+            plot = movie["Plot"] + "."
+            plot = pattern.sub(".", plot)
+            plot = (plot + " ") * 100
             r = Readability(plot)
-            # summaryComplexity.append(r.gunning_fog())
-            summaryComplexity.append(r.flesch_kincaid())
+            if fleschKincaid:
+                if r.flesch_kincaid().score > 100:
+                    continue
+                summaryComplexity.append(r.flesch_kincaid().score)
+            elif gunningFog:
+                if r.gunning_fog().score > 30:
+                    continue
+                summaryComplexity.append(r.gunning_fog().score)
             revenue.append(boxOffice)
             numMovies += 1
-            print("Finished processing {title}".format(title=movie["Title"]))
+            print("Finished processing {numMovies} movies".format(numMovies=numMovies))
 
-        print("Finished processing {numMovies} movies".format(numMovies=numMovies))
         presentResults(summaryComplexity, revenue)
 
 
