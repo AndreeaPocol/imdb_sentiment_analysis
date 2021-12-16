@@ -2,6 +2,7 @@ import json
 import scipy.stats as sts
 from re import sub
 import matplotlib.pyplot as plt
+import adjust_revenue_for_inflation as arfi
 
 englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 
@@ -53,6 +54,7 @@ def processSummaryLengthRevenueRelationshipAllGenres():
                 or "Type" not in movie
                 or "Country" not in movie
                 or "BoxOffice" not in movie
+                or "Year" not in movie
             ):
                 continue
             if movie["Type"] != "movie":
@@ -67,6 +69,8 @@ def processSummaryLengthRevenueRelationshipAllGenres():
             ):
                 continue
             boxOffice = float(sub(r"[^\d.]", "", movie["BoxOffice"]))
+            releaseYear = movie["Year"]
+            boxOffice = arfi.adjustRevenueForInflation(boxOffice, releaseYear)
             plot = movie["Plot"]
             numWords = len(plot.split())
             summaryLength.append(numWords)
