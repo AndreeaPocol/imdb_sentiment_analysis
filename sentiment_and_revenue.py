@@ -7,10 +7,11 @@ from scipy.optimize import curve_fit
 from re import sub
 import matplotlib.pyplot as plt
 from nltk.sentiment import SentimentIntensityAnalyzer
+import adjust_revenue_for_inflation as arfi
 
-filter = False  # filter based on runtime and revenue
-write = False  # write resuls to CSV file
-save = False  # save results as PNG
+filter = True  # filter based on runtime and revenue
+write = True  # write resuls to CSV file
+save = True  # save results as PNG
 # curve / line of best fit
 lobf = False  # polyfit, degree 1
 cobf1 = False  # curve_fit
@@ -177,6 +178,7 @@ def processSentimentRevenueRelationshipAllGenres():
                 or "Title" not in movie
                 or "Type" not in movie
                 or "Country" not in movie
+                or "Year" not in movie
             ):
                 continue
             if filter:
@@ -201,6 +203,8 @@ def processSentimentRevenueRelationshipAllGenres():
             if not releasedInEnglishSpeakingCountry(countries):
                 continue
             revenue = float(sub(r"[^\d.]", "", boxOffice))
+            releaseYear = movie["Year"]
+            revenue = arfi.adjustRevenueForInflation(revenue, releaseYear)
             if filter:
                 if revenue < 1000000:
                     continue
