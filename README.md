@@ -1,10 +1,10 @@
 This is a suite of scripts offering insight into the most lucrative properties of films.
 Big data is harnessed to produce simple and clear visualizations.
-
-Ensure `imdb.omdb_rated_movies_1960_2019.json` containing all movies resides in the same directory as whatever script you wish to run.
-This data is not provided in the repository but can be obtained with a subscription to a database like IMDb.
+Data is aggregated from IMDb, TMDb, and OMDb, and revenues are adjusted for inflation. 
 
 The following is a list of all scripts included in this repository. 
+Ensure `imdb.omdb_rated_movies_1960_2019.json` containing all movies resides in the same directory as whatever script you wish to run.
+This data is not provided in the repository but can be obtained with a subscription to a database like IMDb.
 
 # Genre vs Revenue
 Run:
@@ -75,3 +75,5 @@ Parameters:
 
 Output:
 Produces a graph illustrating the effect of summary complexity (readability score) on box office revenue
+
+See accompanying paper (coming soon) for results.
