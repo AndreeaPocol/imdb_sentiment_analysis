@@ -2,6 +2,7 @@ import json
 import statistics
 import matplotlib.pyplot as plt
 from re import sub
+import adjust_revenue_for_inflation as arfi
 
 englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 
@@ -59,6 +60,7 @@ def processSentimentRevenueRelationshipAllGenres():
                 "BoxOffice" not in movie
                 or "Type" not in movie
                 or "Country" not in movie
+                or "Year" not in movie
             ):
                 continue
             if movie["Type"] != "movie":
@@ -69,6 +71,8 @@ def processSentimentRevenueRelationshipAllGenres():
             if movie["BoxOffice"] == "N/A":
                 continue
             revenue = float(sub(r"[^\d.]", "", movie["BoxOffice"]))
+            releaseYear = movie["Year"]
+            revenue = arfi.adjustRevenueForInflation(revenue, releaseYear)
             # if revenue < 1000000:
             #     continue
             movieGenres = movie["Genre"].split(",")
