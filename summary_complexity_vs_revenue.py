@@ -4,9 +4,10 @@ from re import sub
 import csv
 import matplotlib.pyplot as plt
 from readability import Readability
+import adjust_revenue_for_inflation as arfi
 
-fleschKincaid = False
-gunningFog = True
+fleschKincaid = True
+gunningFog = False
 
 englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 
@@ -44,6 +45,7 @@ def processSummaryComplexityRevenueRelationshipAllGenres():
                 or "Type" not in movie
                 or "Country" not in movie
                 or "BoxOffice" not in movie
+                or "Year" not in movie
             ):
                 continue
             if movie["Type"] != "movie":
@@ -54,6 +56,8 @@ def processSummaryComplexityRevenueRelationshipAllGenres():
             if movie["BoxOffice"] == "N/A" or movie["Plot"] == "N/A":
                 continue
             boxOffice = float(sub(r"[^\d.]", "", movie["BoxOffice"]))
+            releaseYear = movie["Year"]
+            boxOffice = arfi.adjustRevenueForInflation(boxOffice, releaseYear)
             pattern = re.compile(r"\.{1,}")
             plot = movie["Plot"] + "."
             plot = pattern.sub(".", plot)
