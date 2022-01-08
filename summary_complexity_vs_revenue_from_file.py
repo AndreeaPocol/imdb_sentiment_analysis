@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 
-fleschKincaid = True
-gunningFog = False
+fleschKincaid = False
+gunningFog = True
 cobf = True
 englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
 
