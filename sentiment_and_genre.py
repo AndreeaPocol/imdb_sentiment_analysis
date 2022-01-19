@@ -2,26 +2,10 @@ import json
 import statistics
 import matplotlib.pyplot as plt
 from nltk.sentiment import SentimentIntensityAnalyzer
+from constants import *
 
 
 sia = SentimentIntensityAnalyzer()
-englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
-genresToConsider = {
-    "Horror": [],
-    "Romance": [],
-    "Comedy": [],
-    "Action": [],
-    "Adventure": [],
-    "Animation": [],
-    "Crime": [],
-}
-
-
-def releasedInEnglishSpeakingCountry(countries):
-    for country in countries:
-        if country in englishSpeakingCountries:
-            return True
-    return False
 
 
 def addMoviesToGenreLists(plot, movieGenres):
@@ -41,15 +25,24 @@ def presentResults():
 
     # graph results
     fig = plt.figure()
-    plt.bar(genres, averageScores, color="maroon", width=0.4)
-
-    title = "The Effect of Genre on Movie Summary Sentiment Score"
+    plt.bar(genres, averageScores, color="black", width=0.4)
+    title = "Average Movie Summary Sentiment Score by Genre"
     filename = "genre_vs_average_sentiment_score"
     fig.suptitle(title, wrap=True)
     plt.xlabel("Genre")
     plt.ylabel("Average Summary Sentiment Score")
+    BlockColours()
     plt.savefig(filename + ".png")
     plt.show()
+
+
+def BlockColours():
+    plt.axhspan(-0.4, -0.3, facecolor="blue", alpha=0.3, zorder=0)
+    plt.axhspan(-0.3, -0.2, facecolor="blue", alpha=0.2, zorder=0)
+    plt.axhspan(-0.2, -0.1, facecolor="blue", alpha=0.1, zorder=0)
+    plt.axhspan(-0.1, 0, facecolor="blue", alpha=0.05, zorder=0)
+    plt.axhspan(0, 0.1, facecolor="red", alpha=0.1, zorder=0)
+    plt.axhspan(0.1, 0.2, facecolor="red", alpha=0.2, zorder=0)
 
 
 def processSentimentRevenueRelationshipAllGenres():
@@ -62,7 +55,7 @@ def processSentimentRevenueRelationshipAllGenres():
             if movie["Type"] != "movie":
                 continue
             countries = movie["Country"].split(",")
-            if not releasedInEnglishSpeakingCountry(countries):
+            if not releasedInCountryOfInterest(countries):
                 continue
             plot = movie["Plot"]
             movieGenres = movie["Genre"].split(",")

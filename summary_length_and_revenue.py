@@ -3,15 +3,7 @@ import scipy.stats as sts
 from re import sub
 import matplotlib.pyplot as plt
 import adjust_revenue_for_inflation as arfi
-
-englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
-
-
-def releasedInEnglishSpeakingCountry(countries):
-    for country in countries:
-        if country in englishSpeakingCountries:
-            return True
-    return False
+from constants import *
 
 
 def presentResults(summaryLength, revenue):
@@ -60,7 +52,7 @@ def processSummaryLengthRevenueRelationshipAllGenres():
             if movie["Type"] != "movie":
                 continue
             countries = movie["Country"].split(",")
-            if not releasedInEnglishSpeakingCountry(countries):
+            if not releasedInCountryOfInterest(countries):
                 continue
             if (
                 # runTime == "N/A" or

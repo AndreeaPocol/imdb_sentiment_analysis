@@ -5,18 +5,11 @@ import csv
 import matplotlib.pyplot as plt
 from readability import Readability
 import adjust_revenue_for_inflation as arfi
+from constants import *
+
 
 fleschKincaid = True
 gunningFog = False
-
-englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
-
-
-def releasedInEnglishSpeakingCountry(countries):
-    for country in countries:
-        if country in englishSpeakingCountries:
-            return True
-    return False
 
 
 def presentResults(summaryComplexity, revenue):
@@ -51,7 +44,7 @@ def processSummaryComplexityRevenueRelationshipAllGenres():
             if movie["Type"] != "movie":
                 continue
             countries = movie["Country"].split(",")
-            if not releasedInEnglishSpeakingCountry(countries):
+            if not releasedInCountryOfInterest(countries):
                 continue
             if movie["BoxOffice"] == "N/A" or movie["Plot"] == "N/A":
                 continue

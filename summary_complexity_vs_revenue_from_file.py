@@ -1,17 +1,10 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+from constants import *
 
 fleschKincaid = False
 gunningFog = True
 cobf = True
-englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
-
-
-def releasedInEnglishSpeakingCountry(countries):
-    for country in countries:
-        if country in englishSpeakingCountries:
-            return True
-    return False
 
 
 def presentResults(summaryComplexity, revenue):

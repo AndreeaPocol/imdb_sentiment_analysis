@@ -3,26 +3,8 @@ import statistics
 import matplotlib.pyplot as plt
 from re import sub
 import adjust_revenue_for_inflation as arfi
-
-englishSpeakingCountries = ["Australia", "New Zealand", "UK", "USA", "Canada"]
-
-genresToConsider = {
-    "Horror": [],
-    "Romance": [],
-    "Comedy": [],
-    "Action": [],
-    "Adventure": [],
-    "Animation": [],
-    "Crime": [],
-    "Drama": [],
-}
-
-
-def releasedInEnglishSpeakingCountry(countries):
-    for country in countries:
-        if country in englishSpeakingCountries:
-            return True
-    return False
+from constants import *
+import numpy as np
 
 
 def addMoviesToGenreLists(revenue, movieGenres):
@@ -66,7 +48,7 @@ def processSentimentRevenueRelationshipAllGenres():
             if movie["Type"] != "movie":
                 continue
             countries = movie["Country"].split(",")
-            if not releasedInEnglishSpeakingCountry(countries):
+            if not releasedInCountryOfInterest(countries):
                 continue
             if movie["BoxOffice"] == "N/A":
                 continue

@@ -11,7 +11,7 @@ import adjust_revenue_for_inflation as arfi
 from constants import *
 
 
-filter = False  # filter based on runtime and revenue
+filter = True  # filter based on runtime and revenue
 write = True  # write resuls to CSV file
 save = True  # save results as PNG
 # curve / line of best fit
@@ -20,13 +20,21 @@ cobf1 = False  # curve_fit
 cobf2 = False  # https://stackoverflow.com/a/51975675
 cobf3 = False  # polyfit, degree 3
 
+minNumVotes = 100  # [100, 500, 1000]
 sia = SentimentIntensityAnalyzer()
 
 
-def addMoviesToGenreLists(plot, compoundScore, revenue, movieGenres):
+def releasedInCountryOfInterest(countries):
+    for country in countries:
+        if country in countriesOfInterest:
+            return True
+    return False
+
+
+def addMoviesToGenreLists(compoundScore, rating, movieGenres):
     for genre in movieGenres:
         if genre in genresToConsider.keys():
-            movie = {"Plot": plot, "CompoundScore": compoundScore, "Revenue": revenue}
+            movie = {"Rating": rating, "CompoundScore": compoundScore}
             genresToConsider[genre].append(movie)
 
 
@@ -34,59 +42,68 @@ def func(x, a, b, c):
     return a * np.exp(-b * np.array(x)) + c
 
 
-def presentResults(sentimentScore, boxOfficeRevenue, genre):
+def presentResults(sentimentScores, ratings, genre):
     # compute Pearson correlation coefficient
-    if (len(sentimentScore) < 2) or (len(boxOfficeRevenue) < 2):
+    if (len(sentimentScores) < 2) or (len(ratings) < 2):
         print("Not enough movies to present {genre} results".format(genre=genre))
         return
-    if len(sentimentScore) != len(boxOfficeRevenue):
-        print("Number of sentiment score points doesn't equal number of revenue points")
+    if len(sentimentScores) != len(ratings):
+        print("Number of sentiment score points doesn't equal number of rating points")
         return
-    pearsonCorCoef, pValue = sts.pearsonr(sentimentScore, boxOfficeRevenue)
+    pearsonCorCoef, pValue = sts.pearsonr(sentimentScores, ratings)
     print(
         "Pearson correlation coefficient for {num} {genre} summaries: {pearsonCorCoef}, p-value: {pValue}".format(
-            num=len(sentimentScore),
+            num=len(sentimentScores),
             pearsonCorCoef=pearsonCorCoef,
             pValue=pValue,
             genre=genre,
         )
     )
 
-    plotTitle = "The Effect of {genre} Movie Summary Sentiment Score on Box Office Revenue".format(
-        genre=genre
+    plotTitle = (
+        "The Effect of {genre} Movie Summary Sentiment Score on IMDb Rating".format(
+            genre=genre
+        )
     )
     xLabel = "Summary Sentiment Score"
-    yLabel = "Box Office Revenue"
+    yLabel = "IMDb Rating"
+
+    suffix = "other"
+    if countriesOfInterest == englishSpeakingCountries:
+        suffix = "english"
+    elif countriesOfInterest == india:
+        suffix = "india"
+    elif countriesOfInterest == china:
+        suffix = "china"
+    elif countriesOfInterest == europeanCountries:
+        suffix = "european"
+
     if filter:
-        filename = "sentiment_score_vs_box_office_revenue_{genre}_genre_sentiments_filtered".format(
-            genre=genre.lower()
+        filename = "sentiment_score_vs_imdb_rating_{genre}_genre_sentiments_filtered_{countries}".format(
+            genre=genre.lower(), countries=suffix
         )
     else:
-        filename = (
-            "sentiment_score_vs_box_office_revenue_{genre}_genre_sentiments".format(
-                genre=genre.lower()
-            )
+        filename = "sentiment_score_vs_imdb_rating_{genre}_genre_sentiments_{countries}".format(
+            genre=genre.lower(), countries=suffix
         )
 
     # graph results
     fig = plt.figure()
-    plt.plot(sentimentScore, boxOfficeRevenue, ".", color="black")
+    plt.plot(sentimentScores, ratings, ".", color="black")
 
     if lobf:
         # Plot line of best fit
         plt.plot(
-            np.unique(sentimentScore),
-            np.poly1d(np.polyfit(sentimentScore, boxOfficeRevenue, 1))(
-                np.unique(sentimentScore)
-            ),
+            sentimentScores,
+            np.poly1d(np.polyfit(sentimentScores, ratings, 1))(sentimentScores),
         )
     elif cobf1:
         # Plot curve of best fit (1)
         try:
-            popt, pcov = curve_fit(func, sentimentScore, boxOfficeRevenue)
+            popt, pcov = curve_fit(func, sentimentScores, ratings)
             plt.plot(
-                sentimentScore,
-                func(sentimentScore, *popt),
+                sentimentScores,
+                func(sentimentScores, *popt),
                 "r-",
                 label="fit: a=%5.3f, b=%5.3f, c=%5.3f" % tuple(popt),
             )
@@ -96,19 +113,19 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
     elif cobf2:
         # Plot curve of best fit (2)
         cobf.plotCurveOfBestFit(
-            sentimentScore, boxOfficeRevenue, plotTitle, xLabel, yLabel, filename
+            sentimentScores, ratings, plotTitle, xLabel, yLabel, filename
         )
     elif cobf3:
         # Plot curve of best fit
         plt.plot(
-            np.unique(sentimentScore),
-            np.poly1d(np.polyfit(sentimentScore, boxOfficeRevenue, 3))(
-                np.unique(sentimentScore)
+            np.unique(sentimentScores),
+            np.poly1d(np.polyfit(sentimentScores, ratings, 3))(
+                np.unique(sentimentScores)
             ),
         )
 
     if genre == "All":
-        title = "The Effect of Movie Summary Sentiment Score on Box Office Revenue"
+        title = "The Effect of Movie Summary Sentiment Score on IMDb Rating"
     else:
         title = plotTitle
 
@@ -121,8 +138,8 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
 
     # write results
     if write:
-        points = zip(sentimentScore, boxOfficeRevenue)
-        header = ["Sentiment Score", "Box Office Revenue"]
+        points = zip(sentimentScores, ratings)
+        header = ["Sentiment Score", "IMDbRating"]
         with open(filename + ".csv", "w+") as csvfile:
             filewriter = csv.writer(csvfile, delimiter=",")
             filewriter.writerow(header)
@@ -131,38 +148,38 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
 
 def processGenres():
     for genre in genresToConsider.keys():
-        sentimentScore = []
-        revenues = []
+        sentimentScores = []
+        ratings = []
         movies = genresToConsider[genre]
         numMovies = len(movies)
         for movie in movies:
             compoundScore = movie["CompoundScore"]
-            revenue = movie["Revenue"]
-            sentimentScore.append(compoundScore)
-            revenues.append(revenue)
+            rating = movie["Rating"]
+            sentimentScores.append(compoundScore)
+            ratings.append(rating)
         print(
             "Finished processing {numMovies} {genre} movies".format(
                 numMovies=numMovies, genre=genre
             )
         )
-        presentResults(sentimentScore, revenues, genre)
+        presentResults(sentimentScores, ratings, genre)
 
 
 def processSentimentRevenueRelationshipAllGenres():
-    sentimentScore = []
-    revenues = []
+    sentimentScores = []
+    ratings = []
     numMovies = 0
 
     with open("imdb.omdb_rated_movies_1960_2019.json") as f:
         for line in f:
             movie = json.loads(line)
             if (
-                "BoxOffice" not in movie
+                "imdbRating" not in movie
+                or "imdbVotes" not in movie
                 or "Plot" not in movie
                 or "Title" not in movie
                 or "Type" not in movie
                 or "Country" not in movie
-                or "Year" not in movie
             ):
                 continue
             if filter:
@@ -170,37 +187,45 @@ def processSentimentRevenueRelationshipAllGenres():
                     continue
             countries = movie["Country"].split(",")
             plot = movie["Plot"]
-            boxOffice = movie["BoxOffice"]
+            votes = movie["imdbVotes"]
+            rating = movie["imdbRating"]
             if filter:
                 runTime = movie["Runtime"]
             type = movie["Type"]
-            if boxOffice == "N/A" or plot == "N/A":
+            if plot == "N/A" or rating == "N/A" or votes == "N/A":
                 continue
             if filter:
                 if runTime == "N/A":
                     continue
             if type != "movie":
                 continue
-            if filter:
-                if int(runTime.split(" ")[0]) < 75.0:
-                    continue
             if not releasedInCountryOfInterest(countries):
                 continue
-            revenue = float(sub(r"[^\d.]", "", boxOffice))
-            releaseYear = movie["Year"]
-            revenue = arfi.adjustRevenueForInflation(revenue, releaseYear)
             if filter:
+                if int(runTime.split(" ")[0].replace(",", "")) < 75.0:
+                    continue
+            numVotes = float(sub(r"[^\d.]", "", votes))
+            if filter:
+                if "BoxOffice" not in movie:
+                    continue
+                boxOffice = movie["BoxOffice"]
+                if boxOffice == "N/A":
+                    continue
+                revenue = float(sub(r"[^\d.]", "", boxOffice))
                 if revenue < 1000000:
                     continue
+            if numVotes < minNumVotes:
+                continue
+            rating = float(sub(r"[^\d.]", "", rating))
             numMovies += 1
             movieGenres = movie["Genre"].split(",")
             compoundScore = sia.polarity_scores(plot)["compound"]
-            sentimentScore.append(compoundScore)
-            revenues.append(revenue)
-            addMoviesToGenreLists(plot, compoundScore, revenue, movieGenres)
+            sentimentScores.append(compoundScore)
+            ratings.append(rating)
+            addMoviesToGenreLists(compoundScore, rating, movieGenres)
         print("Finished processing {numMovies} movies".format(numMovies=numMovies))
 
-        presentResults(sentimentScore, revenues, "All")
+        presentResults(sentimentScores, ratings, "All")
 
 
 def main():
