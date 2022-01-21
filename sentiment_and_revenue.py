@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 from nltk.sentiment import SentimentIntensityAnalyzer
 import adjust_revenue_for_inflation as arfi
 from constants import *
+import seaborn as sns
 
+sns.set_theme()
 
 filter = False  # filter based on runtime and revenue
 write = True  # write resuls to CSV file
@@ -68,7 +70,27 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
             )
         )
 
-    # graph results
+    # heat map with matplotlib
+    fig = plt.figure()
+    if genre == "All":
+        title = "The Effect of Movie Summary Sentiment Score on Box Office Revenue"
+    else:
+        title = plotTitle
+    fig.suptitle(title, wrap=True)
+    plt.xlabel(xLabel)
+    plt.ylabel(yLabel + " in Billions")
+    x = np.array(sentimentScore)
+    y = np.array(boxOfficeRevenue) / 1000000000
+    y_limit = 0.5 * max(y)  # range=[[-1, 1], [0, y_limit]]
+    heatmap, xedges, yedges = np.histogram2d(x, y, bins=50)
+    extent = [xedges[0], xedges[-1], yedges[0], y_limit]
+    plt.imshow(heatmap.T, extent=extent, origin="lower", cmap="hot")
+    plt.tight_layout()
+    if save:
+        plt.savefig(filename + "_heatmap.png")
+    plt.show()
+
+    # scatter plots
     fig = plt.figure()
     plt.plot(sentimentScore, boxOfficeRevenue, ".", color="black")
 
@@ -106,12 +128,10 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
                 np.unique(sentimentScore)
             ),
         )
-
     if genre == "All":
         title = "The Effect of Movie Summary Sentiment Score on Box Office Revenue"
     else:
         title = plotTitle
-
     fig.suptitle(title, wrap=True)
     plt.xlabel(xLabel)
     plt.ylabel(yLabel)
