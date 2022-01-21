@@ -102,11 +102,11 @@ def presentResults():
 
 
 def BlockColours():
-    plt.axhspan(0, 1000000, facecolor="red", alpha=0.3, zorder=0)
-    plt.axhspan(1000000, 2500000, facecolor="orange", alpha=0.3, zorder=0)
-    plt.axhspan(2500000, 5000000, facecolor="yellow", alpha=0.3, zorder=0)
-    plt.axhspan(5000000, 10000000, facecolor="green", alpha=0.3, zorder=0)
-    plt.axhspan(10000000, 30000000, facecolor="blue", alpha=0.3, zorder=0)
+    plt.axhspan(0, 10000000, facecolor="red", alpha=0.3, zorder=0)
+    plt.axhspan(10000000, 25000000, facecolor="orange", alpha=0.3, zorder=0)
+    plt.axhspan(25000000, 50000000, facecolor="yellow", alpha=0.3, zorder=0)
+    plt.axhspan(50000000, 100000000, facecolor="green", alpha=0.3, zorder=0)
+    plt.axhspan(100000000, 150000000, facecolor="blue", alpha=0.3, zorder=0)
 
 
 def processSentimentRevenueRelationshipAllGenres():

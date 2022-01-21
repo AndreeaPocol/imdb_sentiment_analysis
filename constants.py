@@ -13,10 +13,10 @@ europeanCountries = [
     "Austria",
     "Denmark",
 ]
-# countriesOfInterest = englishSpeakingCountries
+countriesOfInterest = englishSpeakingCountries
 # countriesOfInterest = china
 # countriesOfInterest = india
-countriesOfInterest = europeanCountries
+# countriesOfInterest = europeanCountries
 
 genresToConsider = {
     "Horror": [],
