@@ -11,8 +11,7 @@ import adjust_revenue_for_inflation as arfi
 from constants import *
 import seaborn as sns
 
-sns.set_theme()
-
+# sns.set_theme()
 filter = False  # filter based on runtime and revenue
 write = True  # write resuls to CSV file
 save = True  # save results as PNG
@@ -21,7 +20,6 @@ lobf = False  # polyfit, degree 1
 cobf1 = False  # curve_fit
 cobf2 = False  # https://stackoverflow.com/a/51975675
 cobf3 = False  # polyfit, degree 3
-
 sia = SentimentIntensityAnalyzer()
 
 
@@ -53,7 +51,6 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
             genre=genre,
         )
     )
-
     plotTitle = "The Effect of {genre} Movie Summary Sentiment Score on Box Office Revenue".format(
         genre=genre
     )
@@ -69,7 +66,19 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
                 genre=genre.lower()
             )
         )
+    # Colourmap
+    from matplotlib.colors import ListedColormap
+    import seaborn as seaborn
+    import statistics as stats
 
+    N = len(np.arange(255, 0, -5))
+    vals = np.ones((N, 4))
+    vals[:, 0] = np.arange(255, 0, -5) / 256
+    # np.ones(np.arange(  np.linspace(100/256,1,N)
+    vals[:, 1] = (np.arange(255, 0, -5)) / 256  # np.linspace(100/256,1,N)
+    vals[:, 2] = np.ones(N)  # np.linspace(100/256,1,N)
+    print(vals[:, 0])
+    newcmp = ListedColormap(vals)
     # heat map with matplotlib
     fig = plt.figure()
     if genre == "All":
@@ -78,22 +87,26 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
         title = plotTitle
     fig.suptitle(title, wrap=True)
     plt.xlabel(xLabel)
-    plt.ylabel(yLabel + " in Billions")
+    plt.ylabel(yLabel + " $10^y")
     x = np.array(sentimentScore)
-    y = np.array(boxOfficeRevenue) / 1000000000
+    y = np.log10(np.array(boxOfficeRevenue))  # / 1000000000
+    avgbox = stats.mean(y) * np.ones(len(y))
+    avgsent = stats.mean(x) * np.ones(len(x))
+    # y = np.array(boxOfficeRevenue)/1000000
     y_limit = 0.5 * max(y)  # range=[[-1, 1], [0, y_limit]]
-    heatmap, xedges, yedges = np.histogram2d(x, y, bins=50)
-    extent = [xedges[0], xedges[-1], yedges[0], y_limit]
-    plt.imshow(heatmap.T, extent=extent, origin="lower", cmap="hot")
+    # hm = plt.hexbin(x, y, gridsize=10, cmap=newcmp, bins=N )
+    hm = plt.hist2d(x, y, cmap=newcmp, bins=15)
+    plt.plot(x, avgbox, "r")
+    plt.plot(avgsent, y, "k")
+    plt.xticks(np.arange(-1, 1.25, 0.25))
+    plt.colorbar()
     plt.tight_layout()
     if save:
         plt.savefig(filename + "_heatmap.png")
-    plt.show()
-
+    # plt.show()
     # scatter plots
     fig = plt.figure()
     plt.plot(sentimentScore, boxOfficeRevenue, ".", color="black")
-
     if lobf:
         # Plot line of best fit
         plt.plot(
@@ -138,7 +151,6 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
     if save:
         plt.savefig(filename + ".png")
     plt.show()
-
     # write results
     if write:
         points = zip(sentimentScore, boxOfficeRevenue)
@@ -172,7 +184,6 @@ def processSentimentRevenueRelationshipAllGenres():
     sentimentScore = []
     revenues = []
     numMovies = 0
-
     with open("imdb.omdb_rated_movies_1960_2019.json") as f:
         for line in f:
             movie = json.loads(line)
@@ -219,7 +230,6 @@ def processSentimentRevenueRelationshipAllGenres():
             revenues.append(revenue)
             addMoviesToGenreLists(plot, compoundScore, revenue, movieGenres)
         print("Finished processing {numMovies} movies".format(numMovies=numMovies))
-
         presentResults(sentimentScore, revenues, "All")
 
 
