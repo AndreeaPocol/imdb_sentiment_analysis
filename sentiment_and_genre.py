@@ -37,12 +37,14 @@ def presentResults():
 
 
 def BlockColours():
+    plt.axhspan(-0.5, -0.4, facecolor="blue", alpha=0.4, zorder=0)
     plt.axhspan(-0.4, -0.3, facecolor="blue", alpha=0.3, zorder=0)
     plt.axhspan(-0.3, -0.2, facecolor="blue", alpha=0.2, zorder=0)
     plt.axhspan(-0.2, -0.1, facecolor="blue", alpha=0.1, zorder=0)
     plt.axhspan(-0.1, 0, facecolor="blue", alpha=0.05, zorder=0)
     plt.axhspan(0, 0.1, facecolor="red", alpha=0.1, zorder=0)
     plt.axhspan(0.1, 0.2, facecolor="red", alpha=0.2, zorder=0)
+    plt.axhspan(0.2, 0.3, facecolor="red", alpha=0.3, zorder=0)
 
 
 def processSentimentRevenueRelationshipAllGenres():
@@ -52,12 +54,14 @@ def processSentimentRevenueRelationshipAllGenres():
             movie = json.loads(line)
             if "Plot" not in movie or "Type" not in movie or "Country" not in movie:
                 continue
+            plot = movie["Plot"]
+            if plot == "N/A":
+                continue
             if movie["Type"] != "movie":
                 continue
             countries = movie["Country"].split(",")
             if not releasedInCountryOfInterest(countries):
                 continue
-            plot = movie["Plot"]
             movieGenres = movie["Genre"].split(",")
             addMoviesToGenreLists(plot, movieGenres)
             numMovies += 1
