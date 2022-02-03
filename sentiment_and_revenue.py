@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from nltk.sentiment import SentimentIntensityAnalyzer
 import adjust_revenue_for_inflation as arfi
 from constants import *
-import seaborn as sns
+import statistics as stats
 
 # sns.set_theme()
 filter = False  # filter based on runtime and revenue
@@ -42,6 +42,9 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
     if len(sentimentScore) != len(boxOfficeRevenue):
         print("Number of sentiment score points doesn't equal number of revenue points")
         return
+    avg = np.mean(boxOfficeRevenue)
+    stdev = np.std(boxOfficeRevenue)
+    print("Average revenue for all movies: {}, stdev: {}".format(avg, stdev))
     pearsonCorCoef, pValue = sts.pearsonr(sentimentScore, boxOfficeRevenue)
     print(
         "Pearson correlation coefficient for {num} {genre} summaries: {pearsonCorCoef}, p-value: {pValue}".format(
@@ -68,8 +71,6 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
         )
     # Colourmap
     from matplotlib.colors import ListedColormap
-    import seaborn as seaborn
-    import statistics as stats
 
     N = len(np.arange(255, 0, -5))
     vals = np.ones((N, 4))
@@ -77,7 +78,6 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
     # np.ones(np.arange(  np.linspace(100/256,1,N)
     vals[:, 1] = (np.arange(255, 0, -5)) / 256  # np.linspace(100/256,1,N)
     vals[:, 2] = np.ones(N)  # np.linspace(100/256,1,N)
-    print(vals[:, 0])
     newcmp = ListedColormap(vals)
     # heat map with matplotlib
     fig = plt.figure()
@@ -89,21 +89,20 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
     plt.xlabel(xLabel)
     plt.ylabel(yLabel + " $10^y")
     x = np.array(sentimentScore)
-    y = np.log10(np.array(boxOfficeRevenue))  # / 1000000000
-    avgbox = stats.mean(y) * np.ones(len(y))
+    y = np.array(boxOfficeRevenue)
+    yLog = np.log10(np.array(boxOfficeRevenue))
+    avgbox = np.log10(stats.mean(y)) * np.ones(len(y))
     avgsent = stats.mean(x) * np.ones(len(x))
-    # y = np.array(boxOfficeRevenue)/1000000
-    y_limit = 0.5 * max(y)  # range=[[-1, 1], [0, y_limit]]
-    # hm = plt.hexbin(x, y, gridsize=10, cmap=newcmp, bins=N )
-    hm = plt.hist2d(x, y, cmap=newcmp, bins=15)
+    hm = plt.hist2d(x, yLog, cmap=newcmp, bins=15)
     plt.plot(x, avgbox, "r")
-    plt.plot(avgsent, y, "k")
+    plt.plot(avgsent, yLog, "k")
     plt.xticks(np.arange(-1, 1.25, 0.25))
     plt.colorbar()
     plt.tight_layout()
     if save:
         plt.savefig(filename + "_heatmap.png")
     # plt.show()
+
     # scatter plots
     fig = plt.figure()
     plt.plot(sentimentScore, boxOfficeRevenue, ".", color="black")
