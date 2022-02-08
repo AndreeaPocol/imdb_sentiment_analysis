@@ -13,8 +13,8 @@ import statistics as stats
 
 # sns.set_theme()
 filter = False  # filter based on runtime and revenue
-write = True  # write resuls to CSV file
-save = True  # save results as PNG
+write = False  # write resuls to CSV file
+save = False  # save results as PNG
 # curve / line of best fit
 lobf = False  # polyfit, degree 1
 cobf1 = False  # curve_fit
