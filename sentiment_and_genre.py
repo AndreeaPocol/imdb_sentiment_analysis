@@ -31,6 +31,8 @@ def presentResults():
     fig.suptitle(title, wrap=True)
     plt.xlabel("Genre")
     plt.ylabel("Average Summary Sentiment Score")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
     BlockColours()
     plt.savefig(filename + ".png")
     plt.show()

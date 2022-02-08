@@ -90,6 +90,7 @@ def presentResults():
     for genre, revenue in genresToConsider.items():
         idx = idx + 1
     BlockColours()
+    plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(filename + ".png")
     plt.show()
