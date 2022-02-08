@@ -43,9 +43,6 @@ def presentResults(sentimentScore, boxOfficeRevenue, genre):
     if len(sentimentScore) != len(boxOfficeRevenue):
         print("Number of sentiment score points doesn't equal number of revenue points")
         return
-    avg = np.mean(boxOfficeRevenue)
-    stdev = np.std(boxOfficeRevenue)
-    print("Average revenue for all movies: {}, stdev: {}".format(avg, stdev))
     pearsonCorCoef, pValue = sts.pearsonr(sentimentScore, boxOfficeRevenue)
     print(
         "Pearson correlation coefficient for {num} {genre} summaries: {pearsonCorCoef}, p-value: {pValue}".format(
