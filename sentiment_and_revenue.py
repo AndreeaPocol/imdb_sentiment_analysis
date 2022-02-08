@@ -15,6 +15,7 @@ import statistics as stats
 filter = False  # filter based on runtime and revenue
 write = False  # write resuls to CSV file
 save = False  # save results as PNG
+includeAllCountries = False
 # curve / line of best fit
 lobf = False  # polyfit, degree 1
 cobf1 = False  # curve_fit
@@ -214,8 +215,9 @@ def processSentimentRevenueRelationshipAllGenres():
             if filter:
                 if int(runTime.split(" ")[0]) < 75.0:
                     continue
-            if not releasedInCountryOfInterest(countries):
-                continue
+            if not includeAllCountries:
+                if not releasedInCountryOfInterest(countries):
+                    continue
             revenue = float(sub(r"[^\d.]", "", boxOffice))
             releaseYear = movie["Year"]
             revenue = arfi.adjustRevenueForInflation(revenue, releaseYear)
