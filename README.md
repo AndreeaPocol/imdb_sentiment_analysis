@@ -1,3 +1,5 @@
+Paper: [https://ieeexplore.ieee.org/abstract/document/9898114](https://ieeexplore.ieee.org/abstract/document/9898114)
+
 This is a suite of scripts offering insight into the most lucrative properties of films.
 Big data is harnessed to produce simple and clear visualizations.
 Data is aggregated from IMDb, TMDb, and OMDb, and revenues are adjusted for inflation. 
